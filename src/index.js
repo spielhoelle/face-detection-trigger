@@ -25,6 +25,7 @@ tfjsWasm.setWasmPaths(
 import '@tensorflow-models/face-detection'
 
 import { Camera } from './camera'
+import { action } from './action'
 import { setupDatGui } from './option_panel'
 import { STATE, createDetector } from './shared/params'
 import { setupStats } from './shared/stats_panel'
@@ -132,15 +133,23 @@ async function renderResult() {
     const faceCenter = ((faces[0].box.xMax - faces[0].box.xMin) / 2) + faces[0].box.xMin
     const canvasCenter = camera.canvas.width / 2
     // console.log('Triggered!', triggered, lastSide)
+    let res
     if (!lastSide || (faceCenter > canvasCenter && lastSide === 'right' && triggered == 'right')) {
       lastSide = 'left'
       triggered = 'left'
       console.log('Face is: left')
+      res = await action(triggered)
     } else if (!lastSide || (faceCenter < canvasCenter && lastSide === 'left' && triggered == 'left')) {
       lastSide = 'right'
       triggered = 'right'
       console.log('Face is: right')
+      res = await action(triggered)
     }
+    if (res) {
+      console.log('Response from API: ', res)
+      // TODO react on something
+    }
+
     side.innerHTML = triggered
 
     camera.drawResults(
